@@ -1,3 +1,9 @@
+#include <linux/module.h>
+
+unsigned long original_cr0;
+
+asmlinkage long (*ref_sys_read)(unsigned int fd, char __user *buf, size_t count);
+
 asmlinkage long new_sys_read(unsigned int fd, char __user *buf, size_t count)
 {
     long ret;
