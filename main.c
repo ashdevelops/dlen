@@ -4,6 +4,25 @@ unsigned long original_cr0;
 
 asmlinkage long (*ref_sys_read)(unsigned int fd, char __user *buf, size_t count);
 
+static unsigned long **aquire_sys_call_table(void)
+{
+	unsigned long int offset = PAGE_OFFSET;
+	unsigned long **sct;
+    
+	printk("Starting syscall table scan from: %lx\n", offset);
+	while (offset < ULLONG_MAX) {
+		sct = (unsigned long **)offset;
+		if (sct[__NR_close] == (unsigned long *) sys_close) {
+			printk("Syscall table found at: %lx\n", offset);
+			return sct;
+		}
+
+		offset += sizeof(void *);
+	}
+    
+	return NULL;
+}
+
 asmlinkage long new_sys_read(unsigned int fd, char __user *buf, size_t count)
 {
     long ret;
